@@ -1,0 +1,19 @@
+title: Sundered Doctrine Riddle
+description: A simple web application to match images based on input combinations.
+theme: jekyll-theme-cayman
+url: "https://yourusername.github.io/sundered-doctrine-riddle"
+baseurl: "/sundered-doctrine-riddle"
+
+# Exclude these files from the site
+exclude:
+  - README.md
+  - .gitignore
+  - CNAME
+
+# Custom domain
+# If you are using a custom domain, uncomment and set the following line
+# domain: yourcustomdomain.com
+
+# Social media links (optional)
+# twitter_username: your_twitter_username
+# github_username: your_github_username
