@@ -1,14 +1,13 @@
 body {
     font-family: Arial, sans-serif;
+    color: #ebd43f;
     margin: 20px;
     padding: 0;
-    background-color: #f4f4f428;
+    background-color: #14171a;
     text-align: center;
 }
 
 header {
-    background: #35424a;
-    color: #ffffff;
     padding: 10px 0;
     text-align: center;
 }
@@ -24,8 +23,6 @@ h1 {
 }
 
 footer {
-    background: #35424a;
-    color: #ffffff;
     text-align: center;
     padding: 10px 0;
     position: relative;
@@ -48,4 +45,8 @@ input {
     max-height: 720px;
     width: auto;
     height: auto;
+}
+
+a:link, a:visited, a:hover, a:active {
+    color: #8be942;
 }
