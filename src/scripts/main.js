@@ -5,43 +5,65 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetButton = document.getElementById('reset-button');
     const imageContainer = document.getElementById('image-container');
 
+    const options = ['l1', 'l2', 'r1', 'r2'];
     const images = {
-        'base': 'images/map.png', // for null or empty combinations
-        'l1l2r1': 'images/l1l2r1.png',
-        'l1l2r2': 'images/l1l2r2.png',
-        'l1r1l2': 'images/l1r1l2.png',
-        'l1r1r2': 'images/l1r1r2.png',
-        'l1r2l2': 'images/l1r2l2.png',
-        'l1r2r1': 'images/l1r2r1.png',
-        'l2l1r1': 'images/l2l1r1.png',
-        'l2l1r2': 'images/l2l1r2.png',
-        'l2r1l1': 'images/l2r1l1.png',
-        'l2r1r2': 'images/l2r1r2.png',
-        'l2r2l1': 'images/l2r2l1.png',
-        'l2r2r1': 'images/l2r2r1.png',
-        'r1l1l2': 'images/r1l1l2.png',
-        'r1l1r2': 'images/r1l1r2.png',
-        'r1l2l1': 'images/r1l2l1.png',
-        'r1l2r2': 'images/r1l2r2.png',
-        'r1r2l1': 'images/r1r2l1.png',
-        'r1r2l2': 'images/r1r2l2.png',
-        'r2l1l2': 'images/r2l1l2.png',
-        'r2l1r1': 'images/r2l1r1.png',
-        'r2l2l1': 'images/r2l2l1.png',
-        'r2l2r1': 'images/r2l2r1.png',
-        'r2r1l1': 'images/r2r1l1.png',
-        'r2r1l2': 'images/r2r1l2.png',
-        'l1l2': 'images/l1l2.png',
-        'l1r1': 'images/l1r1.png',
-        'l1r2': 'images/l1r2.png',
-        'l2r1': 'images/l2r1.png',
-        'l2r2': 'images/l2r2.png',
-        'r1r2': 'images/r1r2.png',
-        'l1': 'images/l1.png',
-        'l2': 'images/l2.png',
-        'r1': 'images/r1.png',
-        'r2': 'images/r2.png',
+        'base': 'src/images/map.png', // for null or empty combinations
+        'l1l2r1': 'src/images/l1l2r1.png',
+        'l1l2r2': 'src/images/l1l2r2.png',
+        'l1r1l2': 'src/images/l1r1l2.png',
+        'l1r1r2': 'src/images/l1r1r2.png',
+        'l1r2l2': 'src/images/l1r2l2.png',
+        'l1r2r1': 'src/images/l1r2r1.png',
+        'l2l1r1': 'src/images/l2l1r1.png',
+        'l2l1r2': 'src/images/l2l1r2.png',
+        'l2r1l1': 'src/images/l2r1l1.png',
+        'l2r1r2': 'src/images/l2r1r2.png',
+        'l2r2l1': 'src/images/l2r2l1.png',
+        'l2r2r1': 'src/images/l2r2r1.png',
+        'r1l1l2': 'src/images/r1l1l2.png',
+        'r1l1r2': 'src/images/r1l1r2.png',
+        'r1l2l1': 'src/images/r1l2l1.png',
+        'r1l2r2': 'src/images/r1l2r2.png',
+        'r1r2l1': 'src/images/r1r2l1.png',
+        'r1r2l2': 'src/images/r1r2l2.png',
+        'r2l1l2': 'src/images/r2l1l2.png',
+        'r2l1r1': 'src/images/r2l1r1.png',
+        'r2l2l1': 'src/images/r2l2l1.png',
+        'r2l2r1': 'src/images/r2l2r1.png',
+        'r2r1l1': 'src/images/r2r1l1.png',
+        'r2r1l2': 'src/images/r2r1l2.png',
+        'l1l2': 'src/images/l1l2.png',
+        'l1r1': 'src/images/l1r1.png',
+        'l1r2': 'src/images/l1r2.png',
+        'l2r1': 'src/images/l2r1.png',
+        'l2r2': 'src/images/l2r2.png',
+        'r1r2': 'src/images/r1r2.png',
+        'l1': 'src/images/l1.png',
+        'l2': 'src/images/l2.png',
+        'r1': 'src/images/r1.png',
+        'r2': 'src/images/r2.png',
     };
+
+    function createDropdown(input) {
+        const datalist = document.createElement('datalist');
+        datalist.id = `${input.id}-list`;
+        options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            datalist.appendChild(optionElement);
+        });
+        input.setAttribute('list', datalist.id);
+        document.body.appendChild(datalist);
+
+        input.addEventListener('input', () => {
+            const value = input.value.toLowerCase();
+            const matches = options.filter(option => option.startsWith(value));
+            if (matches.length === 1) {
+                input.value = matches[0];
+            }
+            updateImages();
+        });
+    }
 
     function updateImages() {
         imageContainer.innerHTML = '';
@@ -79,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     [input1, input2, input3].forEach(input => {
-        input.addEventListener('input', updateImages);
+        createDropdown(input);
     });
 
     resetButton.addEventListener('click', resetInputs);

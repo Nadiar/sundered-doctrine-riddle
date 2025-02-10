@@ -34,9 +34,24 @@
     <main>
         <p>This is the main content area of the web application.</p>
         <div class="input-container">
-            <input type="text" id="input1" placeholder="Enter first input">
-            <input type="text" id="input2" placeholder="Enter second input">
-            <input type="text" id="input3" placeholder="Enter third input">
+            <input type="text" id="input1" placeholder="Enter first input" list="datalist1">
+            <datalist id="datalist1">
+                <option value="Option 1">
+                <option value="Option 2">
+                <option value="Option 3">
+            </datalist>
+            <input type="text" id="input2" placeholder="Enter second input" list="datalist2">
+            <datalist id="datalist2">
+                <option value="Option 1">
+                <option value="Option 2">
+                <option value="Option 3">
+            </datalist>
+            <input type="text" id="input3" placeholder="Enter third input" list="datalist3">
+            <datalist id="datalist3">
+                <option value="Option 1">
+                <option value="Option 2">
+                <option value="Option 3">
+            </datalist>
             <button id="reset-button">Reset</button>
         </div>
         <div id="image-container"></div>
