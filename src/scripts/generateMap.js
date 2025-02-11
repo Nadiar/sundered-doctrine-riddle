@@ -2,6 +2,67 @@ let pathSets = [[]];
 let currentSetIndex = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Function to load YAML from a file
+    function loadYamlFromFile(url) {
+        return fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(text => jsyaml.load(text))
+            .catch(error => {
+                console.error('Error loading YAML from file:', error);
+                return null;
+            });
+    }
+
+    // Function to initialize path sets from YAML data
+    function initializePathSets(yamlData) {
+        // Clear existing pathSets
+        pathSets = [];
+        
+        yamlData.forEach(set => {
+            const setName = Object.keys(set)[0];
+            const pathsData = set[setName];
+            const newSet = [];
+            
+            Object.keys(pathsData).forEach((key, index) => {
+                const coords = pathsData[key].Coords;
+                const path = coords.map(coord => ({ x: coord[0], y: coord[1] }));
+                const color = colors[index % colors.length];
+                newSet.push({ path, color, label: key });
+            });
+            
+            pathSets.push(newSet);
+        });
+
+        // Sort pathSets by top-level key
+        pathSets.sort((a, b) => {
+            const aKey = Object.keys(a[0])[0];
+            const bKey = Object.keys(b[0])[0];
+            return aKey.localeCompare(bKey);
+        });
+
+        currentSetIndex = 0;
+        window.paths = pathSets[currentSetIndex];
+        drawPaths();
+        updateLegend();
+    }
+
+    // Load YAML data
+    loadYamlFromFile('src/scripts/puzzle-paths.yaml')
+        .then(yamlData => {
+            if (yamlData) {
+                initializePathSets(yamlData);
+            } else {
+                // Fallback to default YAML data
+                const defaultYamlData = jsyaml.load(window.defaultYaml);
+                initializePathSets(defaultYamlData);
+            }
+        });
+
     // Initialize controls
     function initializeControls() {
         const newPathButton = document.getElementById('newPath');
@@ -9,6 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const resetPathButton = document.getElementById('resetPath');
         const showYamlButton = document.getElementById('showYaml');
         const newPathSetButton = document.getElementById('newPathSet');
+        const cleanUpButton = document.createElement('button');
+        cleanUpButton.id = 'cleanUp';
+        cleanUpButton.textContent = 'Clean Up Points';
+        document.getElementById('mapControls').appendChild(cleanUpButton);
 
         newPathSetButton.addEventListener('click', () => {
             pathSets.push([]);
@@ -59,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
             setDrawingEnabled(false);
             document.getElementById('mapStatus').textContent = 'No path is being created';
         });
+
+        cleanUpButton.addEventListener('click', cleanUpPoints);
 
         // Initialize YAML popup handler
         showYamlButton.addEventListener('click', showYamlPopup);
@@ -155,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const editButton = document.createElement('button');
                     editButton.textContent = 'Edit';
                     editButton.addEventListener('click', () => {
-                        currentPath = [...pathObj.path];
+                        window.drawingState.currentPath = [...pathObj.path];
                         currentSetIndex = setIndex;
                         pathSets[setIndex].splice(pathIndex, 1);
                         drawPaths();
@@ -231,12 +298,122 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(() => alert('YAML copied to clipboard!'))
                 .catch(err => console.error('Failed to copy YAML: ', err));
         };
+
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Download';
+        downloadButton.style.cssText = `
+            position: sticky;
+            top: 0;
+            float: left;
+            margin-left: 10px;
+            margin-bottom: 10px;
+        `;
+        downloadButton.onclick = () => {
+            const blob = new Blob([yamlString], { type: 'text/yaml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'puzzle-paths.yaml';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
         
         popup.appendChild(copyButton);
+        popup.appendChild(downloadButton);
         popup.appendChild(closeButton);
         popup.appendChild(document.createTextNode(yamlString));
         document.body.appendChild(popup);
     }
+
+    function cleanUpPoints() {
+        pathSets.forEach(pathSet => {
+            pathSet.forEach(pathObj => {
+                const newPath = [];
+                const visited = new Set();
+
+                pathObj.path.forEach((point, index) => {
+                    if (!visited.has(index)) {
+                        const closePoints = [point];
+                        visited.add(index);
+
+                        for (let i = index + 1; i < pathObj.path.length; i++) {
+                            if (!visited.has(i)) {
+                                const otherPoint = pathObj.path[i];
+                                const distance = Math.sqrt(
+                                    Math.pow(point.x - otherPoint.x, 2) +
+                                    Math.pow(point.y - otherPoint.y, 2)
+                                );
+                                if (distance <= circleRadius) {
+                                    closePoints.push(otherPoint);
+                                    visited.add(i);
+                                }
+                            }
+                        }
+
+                        const avgX = closePoints.reduce((sum, p) => sum + p.x, 0) / closePoints.length;
+                        const avgY = closePoints.reduce((sum, p) => sum + p.y, 0) / closePoints.length;
+                        newPath.push({ x: avgX, y: avgY });
+                    }
+                });
+
+                pathObj.path = newPath;
+            });
+        });
+
+        drawPaths();
+        updateLegend();
+    }
+
+    function filterLegend() {
+        const input1 = document.getElementById('input1')?.value || '';
+        const input2 = document.getElementById('input2')?.value || '';
+        const input3 = document.getElementById('input3')?.value || '';
+        const filters = [input1, input2, input3];
+
+        let matchCount = 0;
+        pathSets.forEach((pathSet, setIndex) => {
+            const setItem = document.querySelector(`#legendList li:nth-child(${setIndex + 1})`);
+            if (!setItem || pathSet.length === 0) return;
+
+            const matches = window.pathUtils.matchesPathPattern(
+                window.pathUtils.getPathSetName(pathSet),
+                filters
+            );
+
+            if (matches) matchCount++;
+            setItem.style.display = matches ? '' : 'none';
+        });
+
+        // Update the count display
+        document.getElementById('pathSetCount').textContent = 
+            `(${matchCount} match${matchCount !== 1 ? 'es' : ''})`;
+    }
+
+    document.querySelectorAll('.option').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const button = event.target;
+            const value = button.getAttribute('data-value');
+            const input = button.closest('.selection-box').querySelector('input[type="hidden"]');
+            
+            // Toggle selection
+            if (button.classList.contains('selected')) {
+                button.classList.remove('selected');
+                input.value = '';
+            } else {
+                // Remove 'selected' class from all buttons in the same selection box
+                button.closest('.options').querySelectorAll('.option').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                // Add 'selected' class to the clicked button
+                button.classList.add('selected');
+                input.value = value;
+            }
+
+            filterLegend();
+        });
+    });
 
     // Initialize controls when document is ready
     initializeControls();

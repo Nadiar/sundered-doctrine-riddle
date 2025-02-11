@@ -3,14 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate YAML Data</title>
+    <title>Generate YAML File for Custom Sundered Doctrine Puzzle Maps</title>
     <link rel="stylesheet" href="src/styles/style.css">
     <link rel="stylesheet" href="src/styles/generate_map.css">
 </head>
 <body>
-    <div id="legend">
-        <h3>Legend</h3>
-        <ul id="legendList"></ul>
+    <div class="page-header">
+        <div class="input-container">
+            <div class="selection-box">
+                <label for="input1">First Symbol:</label>
+                <div class="options">
+                    <button class="option" data-value="l2">L2</button>
+                    <button class="option" data-value="r2">R2</button>
+                    <button class="option" data-value="l1">L1</button>
+                    <button class="option" data-value="r1">R1</button>
+                </div>
+                <input type="hidden" id="input1" value="">
+            </div>
+            <div class="selection-box">
+                <label for="input2">Second Symbol:</label>
+                <div class="options">
+                    <button class="option" data-value="l2">L2</button>
+                    <button class="option" data-value="r2">R2</button>
+                    <button class="option" data-value="l1">L1</button>
+                    <button class="option" data-value="r1">R1</button>
+                </div>
+                <input type="hidden" id="input2" value="">
+            </div>
+            <div class="selection-box">
+                <label for="input3">Final Symbol:</label>
+                <div class="options">
+                    <button class="option" data-value="l2">L2</button>
+                    <button class="option" data-value="r2">R2</button>
+                    <button class="option" data-value="l1">L1</button>
+                    <button class="option" data-value="r1">R1</button>
+                </div>
+                <input type="hidden" id="input3" value="">
+            </div>
+        </div>
+        <div class="legend-container">
+            <div class="legend-header">
+                <h3>Filtered Path Sets</h3>
+                <span id="pathSetCount" class="path-set-count">(0 matches)</span>
+            </div>
+            <div id="legend">
+                <ul id="legendList"></ul>
+            </div>
+        </div>
     </div>
     <div id="mapStatus">No path is being created</div>
     <canvas id="mapCanvas"></canvas>
@@ -22,8 +61,20 @@
         <button id="showYaml">Show YAML</button>
     </div>
     <div id="yamlOutput"></div>
+    <footer>
+        <p>
+            <a href="index.html">Puzzle Encounter Helper</a> |
+            <a href="legacy.html">Previous Implementation</a> |
+            Custom Map Generator
+        </p>
+        <p>The map credit goes to u/CyanicKenshi on reddit.</p>
+        <p>All solution credit goes to All_The_Players and <a href="https://www.youtube.com/watch?v=5d-aDb0COpc">this video</a>.</p>
+        <p>Contact nadiar on Discord with application problems, project available at <a href="https://github.com/Nadiar/sundered-doctrine-riddle">https://github.com/Nadiar/sundered-doctrine-riddle</a></p>
+    </footer>
+    <script src="src/scripts/pathUtils.js"></script>
     <script src="src/scripts/drawPaths.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-    <script src="src/scripts/generateMap.js"></script>
+    <script src="src/scripts/yamlData.js"></script>
+    <script src="src/scripts/dynamic.js"></script>
 </body>
 </html>

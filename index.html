@@ -3,42 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sundered Doctrine - Puzzle encounter</title>
+    <title>Process YAML Data</title>
     <link rel="stylesheet" href="src/styles/style.css">
+    <link rel="stylesheet" href="src/styles/index.css">
+    <style>
+        .selection-box.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
     <main>
-        <p>This will help you find the optimum placement of lenses in the Puzzle encounter of Destiny 2, the Sundered Doctrine dungeon.</p>
         <div class="input-container">
-            <input type="text" id="input1" placeholder="Enter first input" list="datalist1">
-            <datalist id="datalist1">
-                <option value="l1">
-                <option value="l2">
-                <option value="r1">
-                <option value="r2">
-            </datalist>
-            <input type="text" id="input2" placeholder="Enter second input" list="datalist2">
-            <datalist id="datalist2">
-                <option value="l1">
-                <option value="l2">
-                <option value="r1">
-                <option value="r2">
-            </datalist>
-            <input type="text" id="input3" placeholder="Enter third input" list="datalist3">
-            <datalist id="datalist3">
-                <option value="l1">
-                <option value="l2">
-                <option value="r1">
-                <option value="r2">
-            </datalist>
-            <button id="reset-button">Reset</button>
+            <div class="selection-box">
+                <label for="input1">First Symbol:</label>
+                <div class="options">
+                    <button class="option" data-value="l2">L2</button>
+                    <button class="option" data-value="r2">R2</button>
+                    <button class="option" data-value="l1">L1</button>
+                    <button class="option" data-value="r1">R1</button>
+                    <button class="option selected" data-value="">None</button>
+                </div>
+                <input type="hidden" id="input1" value="">
+            </div>
+            <div class="selection-box">
+                <label for="input2">Second Symbol:</label>
+                <div class="options">
+                    <button class="option" data-value="l2">L2</button>
+                    <button class="option" data-value="r2">R2</button>
+                    <button class="option" data-value="l1">L1</button>
+                    <button class="option" data-value="r1">R1</button>
+                    <button class="option selected" data-value="">None</button>
+                </div>
+                <input type="hidden" id="input2" value="">
+            </div>
+            <div class="selection-box">
+                <label for="input3">Final Symbol:</label>
+                <div class="options">
+                    <button class="option" data-value="l2">L2</button>
+                    <button class="option" data-value="r2">R2</button>
+                    <button class="option" data-value="l1">L1</button>
+                    <button class="option" data-value="r1">R1</button>
+                    <button class="option selected" data-value="">None</button>
+                </div>
+                <input type="hidden" id="input3" value="">
+            </div>
         </div>
         <div id="image-container"></div>
     </main>
+    <canvas id="mapCanvas"></canvas>
+    <div class="file-input-container">
+        <label for="yamlInput">Load your own paths, drag and drop or press Browse:</label>
+        <input type="file" id="yamlInput" accept=".yaml, .yml">
+    </div>
     <footer>
+        <p>
+            Puzzle Encounter Helper |
+            <a href="legacy.html">Previous Implementation</a> |
+            <a href="generate_map.html">Custom Map Generator</a>
+        </p>
         <p>The map credit goes to u/CyanicKenshi on reddit.</p>
         <p>All solution credit goes to All_The_Players and <a href="https://www.youtube.com/watch?v=5d-aDb0COpc">this video</a>.</p>
+        <p>Contact nadiar on Discord with application problems, project available at <a href="https://github.com/Nadiar/sundered-doctrine-riddle">https://github.com/Nadiar/sundered-doctrine-riddle</a></p>
     </footer>
-    <script src="src/scripts/main.js"></script>
+    <script src="src/scripts/pathUtils.js"></script>
+    <script src="src/scripts/drawPaths.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="src/scripts/yamlData.js"></script>
+    <script src="src/scripts/processYaml.js"></script>
+    <script src="src/scripts/dynamic.js"></script>
 </body>
 </html>
