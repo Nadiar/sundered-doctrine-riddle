@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process YAML Data</title>
+    <link rel="stylesheet" href="src/styles/style.css">
+</head>
+<body>
+    <main>
+        <div class="input-container">
+            <input type="text" id="input1" placeholder="Enter first input" list="datalist1">
+            <datalist id="datalist1">
+                <option value="l1">
+                <option value="l2">
+                <option value="r1">
+                <option value="r2">
+            </datalist>
+            <input type="text" id="input2" placeholder="Enter second input" list="datalist2">
+            <datalist id="datalist2">
+                <option value="l1">
+                <option value="l2">
+                <option value="r1">
+                <option value="r2">
+            </datalist>
+            <input type="text" id="input3" placeholder="Enter third input" list="datalist3">
+            <datalist id="datalist3">
+                <option value="l1">
+                <option value="l2">
+                <option value="r1">
+                <option value="r2">
+            </datalist>
+            <input type="file" id="yamlInput" accept=".yaml, .yml">
+        </div>
+        <div id="image-container"></div>
+    </main>
+    <canvas id="mapCanvas"></canvas>
+    <script src="src/scripts/drawPaths.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="src/scripts/processYaml.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map with Paths</title>
+    <link rel="stylesheet" href="src/styles/style.css">
+    <link rel="stylesheet" href="src/styles/dynamic_map.css">
+</head>
+<body>
+    <div id="controls">
+        <button id="drawLine">Draw Path</button>
+        <button id="resetLine">Reset Path</button>
+        <button id="showYaml">Show YAML</button>
+    </div>
+    <canvas id="mapCanvas"></canvas>
+    <div id="yamlOutput"></div>
+    <script src="src/scripts/drawPaths.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+    <script src="src/scripts/generateYaml.js"></script>
+</body>
+</html>
