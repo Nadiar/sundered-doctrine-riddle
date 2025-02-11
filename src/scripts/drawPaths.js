@@ -32,13 +32,18 @@ mapImage.onload = () => {
 };
 
 function drawPaths() {
-    const { paths, currentPath, scale } = window.drawingState;
+    const { pathSets, currentSetIndex, currentPath, scale } = window.drawingState;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
 
-    paths.forEach(drawPath);
-    if (currentPath.length > 0) {
-        drawPath({ path: currentPath, color: colors[paths.length % colors.length] });
+    pathSets.forEach((pathSet, setIndex) => {
+        pathSet.forEach(pathObj => {
+            drawPath(pathObj);
+        });
+    });
+
+    if (currentPath && currentPath.length > 0) {
+        drawPath({ path: currentPath, color: colors[pathSets[currentSetIndex].length % colors.length] });
     }
 }
 
@@ -64,7 +69,7 @@ function drawPath(pathObj) {
         }
     }
     if (path.length > 1) {
-        drawArrow(path[path.length - 2].x * scale, path[path.length - 2].y * scale, path[path.length - 1].x * scale, path[path.length - 1].y * scale);
+        drawArrow(path[path.length - 2].x * scale, path[path.length - 1].y * scale, path[path.length - 1].x * scale, path[path.length - 1].y * scale);
     }
 }
 
@@ -131,6 +136,7 @@ canvas.addEventListener('click', (event) => {
     const x = (event.clientX - rect.left) / window.drawingState.scale;
     const y = (event.clientY - rect.top) / window.drawingState.scale;
     window.drawingState.currentPath.push({ x, y });
+    console.log('Point added to currentPath:', { x, y }); // Add this line
     drawPaths();
 });
 

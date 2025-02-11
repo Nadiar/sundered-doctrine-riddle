@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         newPathButton.addEventListener('click', () => {
-            window.currentPath = [];
+            window.drawingState.currentPath = [];
             window.paths = pathSets[currentSetIndex]; // Ensure paths is updated
             drawPaths();
             setDrawingEnabled(true);
@@ -30,26 +30,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         commitPathButton.addEventListener('click', () => {
-            if (window.currentPath.length > 0) {
+            console.log('Commit Path button clicked');
+            if (window.drawingState.currentPath.length > 0) {
+                console.log('Current path length:', window.drawingState.currentPath.length);
                 const color = colors[pathSets[currentSetIndex].length % colors.length];
-                const lastPoint = window.currentPath[window.currentPath.length - 1];
-                const label = determineLabel(lastPoint.x * scale, lastPoint.y * scale);
+                const lastPoint = window.drawingState.currentPath[window.drawingState.currentPath.length - 1];
+                const label = determineLabel(lastPoint.x * window.drawingState.scale, lastPoint.y * window.drawingState.scale);
                 pathSets[currentSetIndex].push({ 
-                    path: [...window.currentPath], 
+                    path: [...window.drawingState.currentPath], 
                     color, 
                     label 
                 });
-                window.currentPath = [];
-                window.paths = pathSets[currentSetIndex];
+                console.log('Path added to pathSets:', pathSets[currentSetIndex]);
+                window.paths = pathSets[currentSetIndex]; // Update window.paths
+                window.drawingState.currentPath = []; // Clear currentPath
                 drawPaths();
-                setDrawingEnabled(false);
+                setDrawingEnabled(false); // Disable drawing
                 document.getElementById('mapStatus').textContent = 'No path is being created';
                 updateLegend();
+            } else {
+                console.log('No path to commit');
             }
         });
 
         resetPathButton.addEventListener('click', () => {
-            window.currentPath = [];
+            window.drawingState.currentPath = [];
             drawPaths();
             setDrawingEnabled(false);
             document.getElementById('mapStatus').textContent = 'No path is being created';
@@ -72,6 +77,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const setLabel = document.createElement('span');
                 const topLevelKey = pathSet.map(pathObj => pathObj.label).join('');
                 setLabel.textContent = topLevelKey;
+                setLabel.style.cursor = 'pointer';
+                if (setIndex === currentSetIndex) {
+                    setLabel.textContent += ' (Current)';
+                    setLabel.style.fontWeight = 'bold';
+                }
+                setLabel.addEventListener('click', () => {
+                    currentSetIndex = setIndex;
+                    window.paths = pathSets[currentSetIndex];
+                    drawPaths();
+                    updateLegend();
+                });
                 
                 const buttonContainer = document.createElement('div');
                 buttonContainer.className = 'button-container';
@@ -95,8 +111,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateLegend();
                 });
 
+                const addButton = document.createElement('button');
+                addButton.textContent = 'Add Path';
+                addButton.disabled = pathSet.length >= 3;
+                addButton.addEventListener('click', () => {
+                    currentSetIndex = setIndex;
+                    window.drawingState.currentPath = [];
+                    window.paths = pathSets[currentSetIndex];
+                    drawPaths();
+                    setDrawingEnabled(true);
+                    document.getElementById('mapStatus').textContent = `Creating path ${pathSets[currentSetIndex].length + 1} in the current set`;
+                    updateLegend();
+                });
+
                 buttonContainer.appendChild(duplicateButton);
                 buttonContainer.appendChild(deleteButton);
+                buttonContainer.appendChild(addButton);
                 setContainer.appendChild(setLabel);
                 setContainer.appendChild(buttonContainer);
                 setItem.appendChild(setContainer);
@@ -111,8 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const pathLabel = document.createElement('span');
                     pathLabel.textContent = `${pathObj.label} Path ${pathIndex + 1}`;
                     
-                    if (currentPath.length > 0 && 
-                        JSON.stringify(pathObj.path) === JSON.stringify(currentPath) &&
+                    if (window.drawingState.currentPath.length > 0 && 
+                        JSON.stringify(pathObj.path) === JSON.stringify(window.drawingState.currentPath) &&
                         currentSetIndex === setIndex) {
                         pathLabel.style.backgroundColor = '#444';
                         pathLabel.style.padding = '2px 5px';
@@ -187,7 +217,22 @@ document.addEventListener('DOMContentLoaded', () => {
             margin-bottom: 10px;
         `;
         closeButton.onclick = () => popup.remove();
+
+        const copyButton = document.createElement('button');
+        copyButton.textContent = 'Copy to Clipboard';
+        copyButton.style.cssText = `
+            position: sticky;
+            top: 0;
+            float: left;
+            margin-bottom: 10px;
+        `;
+        copyButton.onclick = () => {
+            navigator.clipboard.writeText(yamlString)
+                .then(() => alert('YAML copied to clipboard!'))
+                .catch(err => console.error('Failed to copy YAML: ', err));
+        };
         
+        popup.appendChild(copyButton);
         popup.appendChild(closeButton);
         popup.appendChild(document.createTextNode(yamlString));
         document.body.appendChild(popup);
