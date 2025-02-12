@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Process YAML Data</title>
+    <title>Sundering Doctrine Optimal Puzzle Solutions</title>
     <link rel="stylesheet" href="src/styles/style.css">
     <link rel="stylesheet" href="src/styles/index.css">
     <style>
@@ -18,7 +18,7 @@
         <div class="input-container">
             <div class="selection-box">
                 <label for="input1">First Symbol:</label>
-                <div class="options">
+                <div class="options" data-input="input1">
                     <button class="option" data-value="l2">L2</button>
                     <button class="option" data-value="r2">R2</button>
                     <button class="option" data-value="l1">L1</button>
@@ -67,11 +67,22 @@
         <p>All solution credit goes to All_The_Players and <a href="https://www.youtube.com/watch?v=5d-aDb0COpc">this video</a>.</p>
         <p>Contact nadiar on Discord with application problems, project available at <a href="https://github.com/Nadiar/sundered-doctrine-riddle">https://github.com/Nadiar/sundered-doctrine-riddle</a></p>
     </footer>
-    <script src="src/scripts/pathUtils.js"></script>
-    <script src="src/scripts/drawPaths.js"></script>
+
+    <!-- Load scripts in correct dependency order -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
     <script src="src/scripts/yamlData.js"></script>
+    <script src="src/scripts/pathUtils.js"></script>
+    <script src="src/scripts/drawPaths.js"></script>
     <script src="src/scripts/processYaml.js"></script>
     <script src="src/scripts/dynamic.js"></script>
+    
+    <!-- Error handler -->
+    <script>
+        // Add global error handler
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
+            return false;
+        };
+    </script>
 </body>
 </html>

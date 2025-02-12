@@ -9,8 +9,26 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 0;
-    width: 100%; /* Ensure full width */
+    padding: 5px;
+    margin: 5px 0;
+    background: #2a2a2a;
+    border-radius: 4px;
+}
+
+.legend-item.current {
+    border: 2px solid #4ECDC4;
+}
+
+.path-list {
+    margin-left: 20px;
+}
+
+.path-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px;
+    margin: 3px 0;
 }
 
 .legend-item button {

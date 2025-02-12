@@ -1,8 +1,10 @@
 const canvas = document.getElementById('mapCanvas');
 const ctx = canvas.getContext('2d');
 const circleRadius = 15;
-const colors = ['#FF0000', '#00FF00', '#0000FF'];
 const circleColor = '#a75904';
+
+// Define colors locally
+const pathColors = ['#FF6B6B', '#4ECDC4', '#45B7D1'];
 
 window.drawingState = {
     currentPath: [],
@@ -15,6 +17,7 @@ window.drawingState = {
     pathSets: [[]]
 };
 
+// Core drawing functions
 function resizeCanvas() {
     const aspectRatio = mapImage.width / mapImage.height;
     canvas.width = window.innerWidth;
@@ -26,19 +29,25 @@ function resizeCanvas() {
 const mapImage = new Image();
 mapImage.src = 'src/images/map.png';
 mapImage.onload = () => {
+    console.log('Map image loaded, initializing canvas');
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-    window.dispatchEvent(new Event('drawingReady'));
+    window.drawingSystem = { ready: true, colors: pathColors };
+    window.dispatchEvent(new Event('drawingSystemReady'));
 };
 
 function drawPaths() {
     const { paths, currentPath, scale } = window.drawingState;
+    console.log('Drawing paths:', paths);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
 
-    paths.forEach(drawPath);
+    paths.forEach((pathObj, index) => {
+        console.log('Drawing path:', pathObj);
+        drawPath(pathObj);
+    });
     if (currentPath.length > 0) {
-        drawPath({ path: currentPath, color: colors[paths.length % colors.length] });
+        drawPath({ path: currentPath, color: pathColors[paths.length % pathColors.length] });
     }
 }
 
@@ -66,17 +75,6 @@ function drawPath(pathObj) {
     if (path.length > 1) {
         drawArrow(path[path.length - 2].x * scale, path[path.length - 2].y * scale, path[path.length - 1].x * scale, path[path.length - 1].y * scale);
     }
-}
-
-function adjustPoint(x1, y1, x2, y2, radius) {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const ratio = (distance - radius) / distance;
-    return {
-        x: x1 + dx * ratio,
-        y: y1 + dy * ratio
-    };
 }
 
 function drawCircle(x, y) {
@@ -114,16 +112,18 @@ function drawArrow(x1, y1, x2, y2) {
     ctx.stroke();
 }
 
-function determineLabel(x, y) {
-    const horizontal = x < canvas.width / 2 ? 'L' : 'R';
-    const vertical = y < canvas.height / 2 ? '2' : '1';
-    return `${horizontal}${vertical}`;
+function adjustPoint(x1, y1, x2, y2, radius) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const ratio = (distance - radius) / distance;
+    return {
+        x: x1 + dx * ratio,
+        y: y1 + dy * ratio
+    };
 }
 
-function setDrawingEnabled(enabled) {
-    window.drawingState.isDrawing = enabled;
-}
-
+// Canvas event handlers
 canvas.addEventListener('click', (event) => {
     if (!window.drawingState.isDrawing || window.drawingState.paths.some(p => JSON.stringify(p.path) === JSON.stringify(window.drawingState.currentPath))) return;
     
@@ -163,8 +163,13 @@ canvas.addEventListener('mouseup', () => {
     window.drawingState.dragIndex = -1;
 });
 
+// Public API
 window.drawingAPI = {
     drawPaths,
-    setDrawingEnabled,
-    determineLabel
+    setDrawingEnabled: (enabled) => window.drawingState.isDrawing = enabled,
+    determineLabel: (x, y) => {
+        const horizontal = x < canvas.width / 2 ? 'L' : 'R';
+        const vertical = y < canvas.height / 2 ? '2' : '1';
+        return `${horizontal}${vertical}`;
+    }
 };
