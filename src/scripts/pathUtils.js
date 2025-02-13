@@ -1,10 +1,6 @@
 // Common utilities for path filtering and manipulation
 
 function getPathSetName(pathSet) {
-    // Check if pathSet is an object with a label property
-    if (pathSet.label) {
-        return pathSet.label;
-    }
     // Check if pathSet is an array of path objects
     if (Array.isArray(pathSet)) {
         return pathSet.map(pathObj => pathObj.label).join('');
@@ -19,6 +15,8 @@ function getPathSetName(pathSet) {
 
 function matchesPathPattern(pathSetName, filters) {
     if (!pathSetName) return false;
+    // If all filters are empty, return true to include all path sets
+    if (filters.every(filter => !filter)) return true;
     return filters.every((filter, index) => {
         if (!filter) return true;
         const pathLabel = pathSetName.substring(index * 2, (index * 2) + 2);
@@ -56,6 +54,9 @@ window.pathUtils = {
         console.log('Matching:', { pathSetName, filters });
         if (!pathSetName) return false;
     
+        // If all filters are empty, return true to include all path sets
+        if (filters.every(filter => !filter)) return true;
+
         const setName = pathSetName.toUpperCase(); // Convert to uppercase for comparison
         return filters.every((filter, index) => {
             if (!filter) return true;

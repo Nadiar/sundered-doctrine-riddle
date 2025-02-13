@@ -28,20 +28,52 @@ window.yamlProcessor = {
             reader.onerror = reject;
             reader.readAsText(file);
         });
+    },
+
+    generateYaml(pathSets) {
+        const yamlContent = pathSets.map(pathSet => {
+            const yaml = pathSet.reduce((acc, pathObj) => {
+                acc[pathObj.label] = {
+                    Coords: pathObj.path.map(coord => [Number(coord.x.toFixed(2)), Number(coord.y.toFixed(2))])
+                };
+                return acc;
+            }, {});
+            const topLevelKey = pathSet.map(pathObj => pathObj.label).join('');
+            return { [topLevelKey]: yaml };
+        });
+
+        return jsyaml.dump(yamlContent, { indent: 2 });
+    },
+
+    loadYamlFromFile(url) {
+        return fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(text => this.processYaml(text))
+            .catch(error => {
+                console.error('Error loading YAML from file:', error);
+                return null;
+            });
     }
 };
 
-// Initialize on load
+// Initialize drag and drop functionality
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize YAML file input
     const yamlInput = document.getElementById('yamlInput');
-
-    yamlInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        window.yamlProcessor.handleFileUpload(file).catch((error) => {
-            console.error('Error processing uploaded YAML file:', error);
-            alert('Failed to process uploaded YAML file.');
+    if (yamlInput) {
+        yamlInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            window.yamlProcessor.handleFileUpload(file).catch((error) => {
+                console.error('Error processing uploaded YAML file:', error);
+                alert('Failed to process uploaded YAML file.');
+            });
         });
-    });
+    }
 
     // Drag and drop functionality
     document.addEventListener('dragover', (event) => {
@@ -61,17 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initialize drawing state
-    if (!window.drawingState) {
-        window.drawingState = {
-            currentPath: [],
-            scale: 1,
-            isDragging: false,
-            dragIndex: -1,
-            isDrawing: false,
-            paths: []
-        };
-    }
-
+    // Load default YAML data
     window.yamlProcessor.loadDefaultYaml();
 });

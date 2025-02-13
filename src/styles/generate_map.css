@@ -148,6 +148,14 @@
     border: 3px solid #6039fd;
 }
 
+.option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #444;
+    color: #888;
+    border-color: #666;
+}
+
 /* Legend Container - Holds the filtered path sets */
 .legend-container {
     flex: 1;

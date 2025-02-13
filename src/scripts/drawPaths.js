@@ -1,10 +1,11 @@
 const canvas = document.getElementById('mapCanvas');
 const ctx = canvas.getContext('2d');
 const circleRadius = 15;
-const circleColor = '#a75904';
-
 // Define colors locally
-const pathColors = ['#FF6B6B', '#4ECDC4', '#45B7D1'];
+
+const circleColor = '#945e19';
+const pathColors = ['#FF6B6B', '#4ECDC4', '#ebd43f'];
+const originColor = '#6c91d1';
 
 window.drawingState = {
     currentPath: [],
@@ -14,7 +15,8 @@ window.drawingState = {
     isDrawing: false,
     paths: [],
     currentSetIndex: 0,
-    pathSets: [[]]
+    pathSets: [[]],
+    dragTarget: null // Add this to track what we're dragging
 };
 
 // Core drawing functions
@@ -27,8 +29,8 @@ function resizeCanvas() {
 }
 
 const mapImage = new Image();
-mapImage.src = 'src/images/map.png';
-mapImage.onload = () => {
+    mapImage.src = 'src/images/map.png';
+    mapImage.onload = () => {
     console.log('Map image loaded, initializing canvas');
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -42,60 +44,70 @@ function drawPaths() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
 
+    // First draw all paths and arrows
     paths.forEach((pathObj, index) => {
         console.log('Drawing path:', pathObj);
-        drawPath(pathObj);
+        drawPathOnly(pathObj);
     });
     if (currentPath.length > 0) {
-        drawPath({ path: currentPath, color: pathColors[paths.length % pathColors.length] });
+        drawPathOnly({ path: currentPath, color: pathColors[paths.length % pathColors.length] });
+    }
+
+    // Then draw all circles on top
+    paths.forEach((pathObj) => {
+        drawPathCircles(pathObj);
+    });
+    if (currentPath.length > 0) {
+        drawPathCircles({ path: currentPath });
     }
 }
 
-function drawPath(pathObj) {
+function drawPathOnly(pathObj) {
     const { path, color } = pathObj;
     const { scale } = window.drawingState;
     if (!path || path.length === 0) return;
-
+    
     ctx.strokeStyle = color;
     ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.save();
 
-    ctx.beginPath();
-    ctx.moveTo(path[0].x * scale, path[0].y * scale);
-    drawCircle(path[0].x * scale, path[0].y * scale);
     for (let i = 1; i < path.length; i++) {
+        ctx.beginPath();
         const start = adjustPoint(path[i - 1].x * scale, path[i - 1].y * scale, path[i].x * scale, path[i].y * scale, circleRadius);
         const end = adjustPoint(path[i].x * scale, path[i].y * scale, path[i - 1].x * scale, path[i - 1].y * scale, circleRadius);
         ctx.moveTo(start.x, start.y);
         ctx.lineTo(end.x, end.y);
         ctx.stroke();
-        if (i < path.length - 1) {
-            drawCircle(path[i].x * scale, path[i].y * scale);
-        }
     }
     if (path.length > 1) {
         drawArrow(path[path.length - 2].x * scale, path[path.length - 2].y * scale, path[path.length - 1].x * scale, path[path.length - 1].y * scale);
     }
+    ctx.restore();
 }
 
-function drawCircle(x, y) {
-    ctx.beginPath();
-    ctx.strokeStyle = circleColor;
-    ctx.fillStyle = circleColor;
-    
-    try {
-        const imageData = ctx.getImageData(x, y, 1, 1);
-        const [r, g, b] = imageData.data;
-        const pointColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-        
-        if (pointColor === circleColor) {
-            ctx.fill();
+function drawPathCircles(pathObj) {
+    const { path } = pathObj;
+    const { scale } = window.drawingState;
+    if (!path || path.length === 0) return;
+
+    path.forEach((point, index) => {
+        if (index < path.length - 1) {
+            // Use originColor for the first circle, circleColor for the rest
+            const color = index === 0 ? originColor : circleColor;
+            drawCircle(point.x * scale, point.y * scale, color);
         }
-    } catch (e) {
-        // If we can't get the pixel data, just draw an unfilled circle
-    }
-    
+    });
+}
+
+function drawCircle(x, y, color) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
     ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
     ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+    ctx.save();
 }
 
 function drawArrow(x1, y1, x2, y2) {
@@ -103,13 +115,17 @@ function drawArrow(x1, y1, x2, y2) {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const angle = Math.atan2(dy, dx);
-    
+
     ctx.beginPath();
-    ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - headLength * Math.cos(angle - Math.PI / 6), y2 - headLength * Math.sin(angle - Math.PI / 6));
-    ctx.moveTo(x2, y2);
+    
+    ctx.moveTo(x2 - headLength * Math.cos(angle - Math.PI / 6), y2 - headLength * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2, y2);
     ctx.lineTo(x2 - headLength * Math.cos(angle + Math.PI / 6), y2 - headLength * Math.sin(angle + Math.PI / 6));
+    ctx.moveTo(x2, y2);
+    ctx.lineTo((x2 - headLength * Math.cos(angle - Math.PI / 6) + x2 - headLength * Math.cos(angle + Math.PI / 6)) / 2, 
+               (y2 - headLength * Math.sin(angle - Math.PI / 6) + y2 - headLength * Math.sin(angle + Math.PI / 6)) / 2);
     ctx.stroke();
+    ctx.closePath();
 }
 
 function adjustPoint(x1, y1, x2, y2, radius) {
@@ -135,32 +151,87 @@ canvas.addEventListener('click', (event) => {
 });
 
 canvas.addEventListener('mousedown', (event) => {
-    if (!window.drawingState.isDrawing) return;
     const rect = canvas.getBoundingClientRect();
     const x = (event.clientX - rect.left) / window.drawingState.scale;
     const y = (event.clientY - rect.top) / window.drawingState.scale;
-    window.drawingState.currentPath.forEach((point, index) => {
+    
+    // Only allow dragging in edit mode
+    if (window.isEditMode) {
+        // Check for circle hits first
+        window.currentPath.forEach((point, index) => {
+            const dx = point.x - x;
+            const dy = point.y - y;
+            if (Math.sqrt(dx * dx + dy * dy) < circleRadius / window.drawingState.scale) {
+                window.drawingState.isDragging = true;
+                window.drawingState.dragIndex = index;
+                window.drawingState.dragTarget = 'circle';
+                return;
+            }
+        });
+        
+        // If no circle was hit, check for arrow hit
+        if (!window.drawingState.isDragging && window.currentPath.length > 1) {
+            const lastPoint = window.currentPath[window.currentPath.length - 1];
+            const dx = lastPoint.x - x;
+            const dy = lastPoint.y - y;
+            if (Math.sqrt(dx * dx + dy * dy) < circleRadius / window.drawingState.scale) {
+                window.drawingState.isDragging = true;
+                window.drawingState.dragIndex = window.currentPath.length - 1;
+                window.drawingState.dragTarget = 'arrow';
+            }
+        }
+    } else if (window.drawingState.isDrawing) {
+        // Original point-adding behavior for draw mode
         const dx = point.x - x;
         const dy = point.y - y;
         if (Math.sqrt(dx * dx + dy * dy) < circleRadius / window.drawingState.scale) {
             window.drawingState.isDragging = true;
             window.drawingState.dragIndex = index;
         }
-    });
+    }
 });
 
 canvas.addEventListener('mousemove', (event) => {
     if (!window.drawingState.isDragging) return;
+    
     const rect = canvas.getBoundingClientRect();
     const x = (event.clientX - rect.left) / window.drawingState.scale;
     const y = (event.clientY - rect.top) / window.drawingState.scale;
-    window.drawingState.currentPath[window.drawingState.dragIndex] = { x, y };
-    drawPaths();
+    
+    if (window.drawingState.dragTarget === 'circle' || window.drawingState.dragTarget === 'arrow') {
+        window.currentPath[window.drawingState.dragIndex] = { x, y };
+        drawPaths();
+    }
 });
 
 canvas.addEventListener('mouseup', () => {
     window.drawingState.isDragging = false;
     window.drawingState.dragIndex = -1;
+    window.drawingState.dragTarget = null;
+});
+
+// Add cursor style changes
+canvas.addEventListener('mousemove', (event) => {
+    if (window.isEditMode) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / window.drawingState.scale;
+        const y = (event.clientY - rect.top) / window.drawingState.scale;
+        
+        let canDrag = false;
+        
+        // Check circles and arrow
+        window.currentPath.forEach((point, index) => {
+            const dx = point.x - x;
+            const dy = point.y - y;
+            if (Math.sqrt(dx * dx + dy * dy) < circleRadius / window.drawingState.scale) {
+                canDrag = true;
+            }
+        });
+        
+        canvas.style.cursor = canDrag ? 'move' : 'default';
+    } else {
+        canvas.style.cursor = 'default';
+    }
 });
 
 // Public API
