@@ -3,33 +3,33 @@
 }
 
 @media screen and (max-width: 768px) {
-    body {
+    body, main {
         margin: 0;
         padding: 0;
         height: 100vh;
         width: 100vw;
         overflow: hidden;
-    }
-
-    main {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        width: 100vw;
-        position: fixed;
-        top: 0;
-        left: 0;
+        background: #000;
+        position: relative;
     }
 
     #mapCanvas {
         position: fixed;
+        top: 50%;
+        left: 50%;
+        /* Using exact 4096x2188 aspect ratio (≈1.873) */
+        width: min(100vh * 1.873, 200vw);
+        height: min(100vw * 0.534, 200vh);
+        transform: translate(-50%, -50%) rotate(90deg);
+        transform-origin: center;
+        z-index: 1;
+    }
+
+    canvas {
+        position: fixed;
         top: 0;
         left: 0;
-        width: 100vh; /* Use viewport height for width */
-        height: 100vw; /* Use viewport width for height */
-        transform-origin: top left;
-        transform: rotate(90deg) translateY(-100%);
-        z-index: 0; /* Ensure map stays behind input container */
+        z-index: 2; /* Drawing layer */
     }
 
     .input-container {
@@ -43,7 +43,7 @@
         min-height: fit-content;
         background: rgba(20, 20, 20, 0.98); /* More opaque background */
         padding: 15px;
-        z-index: 100; /* Higher than canvas */
+        z-index: 3; /* Top layer */
         box-shadow: -2px 0 10px rgba(0,0,0,0.5);
         border-left: 2px solid #ebd43f;
         box-sizing: border-box; /* Include padding in width calculation */
@@ -156,5 +156,47 @@
 
     footer {
         display: none; /* Hide footer on mobile */
+    }
+
+    .file-input-container {
+        display: none; /* Hide file input on mobile */
+    }
+
+    .mobile-about-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 1000;
+        padding: 20px;
+        box-sizing: border-box;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-about-popup.hidden {
+        display: none;
+    }
+
+    .mobile-about-content {
+        max-width: 80%;
+        text-align: center;
+    }
+
+    .mobile-about-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #ebd43f;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 10px;
     }
 }

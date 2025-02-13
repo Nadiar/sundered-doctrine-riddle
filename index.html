@@ -36,6 +36,16 @@
     </style>
 </head>
 <body>
+    <div class="mobile-about-popup hidden">
+        <button class="mobile-about-close">×</button>
+        <div class="mobile-about-content">
+            <h2>Sundered Doctrine Puzzle Helper</h2>
+            <p>Map credit: u/CyanicKenshi on reddit</p>
+            <p>Solution credit: All_The_Players and <a href="https://www.youtube.com/watch?v=5d-aDb0COpc">this video</a></p>
+            <p>Contact: nadiar on Discord</p>
+            <p>Project: <a href="https://github.com/Nadiar/sundered-doctrine-riddle">GitHub</a></p>
+        </div>
+    </div>
     <button id="toggleFilters" aria-label="Toggle Filters">
         Hide Filters
     </button>
@@ -76,25 +86,11 @@
             </div>
             <div class="mobile-about">
                 <button class="about-toggle">About</button>
-                <div class="about-content hidden">
-                    <p>
-                        Puzzle Encounter Helper |
-                        <a href="legacy.html">Previous Implementation</a>
-                    </p>
-                    <p>Map credit: u/CyanicKenshi on reddit.</p>
-                    <p>Solution credit: All_The_Players and <a href="https://www.youtube.com/watch?v=5d-aDb0COpc">this video</a>.</p>
-                    <p>Contact: nadiar on Discord</p>
-                    <p>Project: <a href="https://github.com/Nadiar/sundered-doctrine-riddle">GitHub</a></p>
-                </div>
             </div>
         </div>
         <div id="image-container"></div>
     </main>
     <canvas id="mapCanvas"></canvas>
-    <div class="file-input-container">
-        <label for="yamlInput">Load your own paths, drag and drop or press Browse:</label>
-        <input type="file" id="yamlInput" accept=".yaml, .yml">
-    </div>
     <footer>
         <p>
             Puzzle Encounter Helper |
@@ -132,8 +128,11 @@
 
         // Add About toggle handler
         document.querySelector('.about-toggle')?.addEventListener('click', function() {
-            this.nextElementSibling.classList.toggle('hidden');
-            this.textContent = this.nextElementSibling.classList.contains('hidden') ? 'About' : 'Hide About';
+            document.querySelector('.mobile-about-popup').classList.remove('hidden');
+        });
+
+        document.querySelector('.mobile-about-close')?.addEventListener('click', function() {
+            document.querySelector('.mobile-about-popup').classList.add('hidden');
         });
 
         // Force landscape orientation on mobile
