@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sundering Doctrine Optimal Puzzle Solutions</title>
     <link rel="stylesheet" href="src/styles/style.css">
     <link rel="stylesheet" href="src/styles/index.css">
+    <link rel="stylesheet" href="src/styles/mobile.css">
     <style>
         .selection-box {
             position: relative;
@@ -35,6 +36,9 @@
     </style>
 </head>
 <body>
+    <button id="toggleFilters" aria-label="Toggle Filters">
+        Hide Filters
+    </button>
     <main>
         <div class="input-container">
             <div class="selection-box">
@@ -69,6 +73,19 @@
                     <button class="option selected" data-value="">None</button>
                 </div>
                 <input type="hidden" id="input3" value="">
+            </div>
+            <div class="mobile-about">
+                <button class="about-toggle">About</button>
+                <div class="about-content hidden">
+                    <p>
+                        Puzzle Encounter Helper |
+                        <a href="legacy.html">Previous Implementation</a>
+                    </p>
+                    <p>Map credit: u/CyanicKenshi on reddit.</p>
+                    <p>Solution credit: All_The_Players and <a href="https://www.youtube.com/watch?v=5d-aDb0COpc">this video</a>.</p>
+                    <p>Contact: nadiar on Discord</p>
+                    <p>Project: <a href="https://github.com/Nadiar/sundered-doctrine-riddle">GitHub</a></p>
+                </div>
             </div>
         </div>
         <div id="image-container"></div>
@@ -105,6 +122,26 @@
             console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
             return false;
         };
+
+        document.getElementById('toggleFilters').addEventListener('click', function() {
+            const inputContainer = document.querySelector('.input-container');
+            const isHidden = inputContainer.classList.toggle('hidden');
+            this.textContent = isHidden ? 'Show Filters' : 'Hide Filters';
+            this.classList.toggle('hidden', isHidden); // Add hidden class to button
+        });
+
+        // Add About toggle handler
+        document.querySelector('.about-toggle')?.addEventListener('click', function() {
+            this.nextElementSibling.classList.toggle('hidden');
+            this.textContent = this.nextElementSibling.classList.contains('hidden') ? 'About' : 'Hide About';
+        });
+
+        // Force landscape orientation on mobile
+        if (window.screen && window.screen.orientation) {
+            window.screen.orientation.lock('landscape').catch(() => {
+                // Silently fail if orientation lock is not supported
+            });
+        }
     </script>
 </body>
 </html>

@@ -1,0 +1,160 @@
+#toggleFilters {
+    display: none; /* Hidden by default on desktop */
+}
+
+@media screen and (max-width: 768px) {
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    main {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+        top: 0;
+        left: 0;
+    }
+
+    #mapCanvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vh; /* Use viewport height for width */
+        height: 100vw; /* Use viewport width for height */
+        transform-origin: top left;
+        transform: rotate(90deg) translateY(-100%);
+        z-index: 0; /* Ensure map stays behind input container */
+    }
+
+    .input-container {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 200px; /* Fixed width instead of fit-content */
+        min-width: 180px;
+        max-width: 250px;
+        height: auto;
+        min-height: fit-content;
+        background: rgba(20, 20, 20, 0.98); /* More opaque background */
+        padding: 15px;
+        z-index: 100; /* Higher than canvas */
+        box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+        border-left: 2px solid #ebd43f;
+        box-sizing: border-box; /* Include padding in width calculation */
+        transition: right 0.3s ease-out;
+        pointer-events: auto; /* Ensure clicks work */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .selection-box {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .selection-box label {
+        font-size: 14px;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+        width: 100%;
+    }
+
+    .option {
+        padding: 8px 5px;
+        font-size: 12px;
+        min-width: 0;
+    }
+
+    .input-container.hidden {
+        right: calc(-100% - 2px); /* Move off screen plus border width */
+    }
+
+    #toggleFilters {
+        display: flex; /* Show only on mobile */
+        position: fixed;
+        top: 50%; /* Use viewport height */
+        right: 200px; /* Match input-container width exactly */
+        transform-origin: top left;
+        transform: 
+            translateY(-50%) 
+            translateX(100%) 
+            rotate(-90deg) 
+            translateY(-100%); /* Move button up by its own height */
+        background: #2a2a2a;
+        border: 2px solid #ebd43f;
+        border-bottom: none;
+        padding: 4px 10px;
+        color: #ebd43f;
+        font-size: 12px; /* Reduced from 14px */
+        cursor: pointer;
+        z-index: 101; /* Higher than input-container */
+        border-radius: 4px 4px 0 0; /* Reduced from 8px */
+        white-space: nowrap;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
+        transition: right 0.3s ease-out;
+    }
+
+    #toggleFilters::before,
+    #toggleFilters::after {
+        content: "==="; /* Reduced from "=====" */
+        color: #ebd43f;
+        margin: 0 4px; /* Reduced from 8px */
+    }
+
+    #toggleFilters.hidden {
+        right: 0; /* Move to edge of screen when hidden */
+    }
+
+    .mobile-about {
+        margin-top: auto;
+        padding-top: 20px;
+        border-top: 1px solid rgba(235, 212, 63, 0.3);
+    }
+
+    .about-toggle {
+        width: 100%;
+        padding: 8px;
+        background: #2a2a2a;
+        border: 1px solid #ebd43f;
+        color: #ebd43f;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+
+    .about-content {
+        padding: 10px 0;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .about-content p {
+        margin: 8px 0;
+    }
+
+    .about-content a {
+        color: #ebd43f;
+        text-decoration: none;
+    }
+
+    .about-content.hidden {
+        display: none;
+    }
+
+    footer {
+        display: none; /* Hide footer on mobile */
+    }
+}
