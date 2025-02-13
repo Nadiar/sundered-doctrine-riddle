@@ -47,7 +47,7 @@
         </div>
     </div>
     <button id="toggleFilters" aria-label="Toggle Filters">
-        Hide Filters
+        === Hide Filters ===
     </button>
     <main>
         <div class="input-container">
@@ -122,7 +122,7 @@
         document.getElementById('toggleFilters').addEventListener('click', function() {
             const inputContainer = document.querySelector('.input-container');
             const isHidden = inputContainer.classList.toggle('hidden');
-            this.textContent = isHidden ? 'Show Filters' : 'Hide Filters';
+            this.textContent = isHidden ? '=== Show Filters ===' : '=== Hide Filters ===';
             this.classList.toggle('hidden', isHidden); // Add hidden class to button
         });
 

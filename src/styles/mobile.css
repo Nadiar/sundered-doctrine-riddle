@@ -19,7 +19,7 @@ html, body {
         margin: 0;
         padding: 0;
         width: 100%;
-        height: 100%;
+        height: calc(100% - 56px); /* Adjust height to account for navigation bar */
         overflow: hidden;
         background: #14161b;
         position: relative;
@@ -38,6 +38,9 @@ html, body {
         transform: translatex(calc(50vw - 50%)) translatey(calc(50vh - 50%)) rotate(90deg);
         transform-origin: center;
         z-index: 1; /* Base layer */
+        image-rendering: auto;
+        background: url('src/images/map-half.png') no-repeat center center;
+        background-size: contain;
     }
 
     canvas {
@@ -61,7 +64,7 @@ html, body {
         box-shadow: -2px 0 10px rgba(0,0,0,0.5);
         border-left: 2px solid #ebd43f;
         box-sizing: border-box; /* Include padding in width calculation */
-        transition: right 0.3s ease-out;
+        transition: right 0.2s ease-out;
         pointer-events: auto; /* Ensure clicks work */
         display: flex;
         flex-direction: column;
@@ -100,36 +103,28 @@ html, body {
         display: flex; /* Show only on mobile */
         position: fixed;
         top: 50%; /* Use viewport height */
-        right: 200px; /* Match input-container width exactly */
-        transform-origin: top left;
-        transform: 
-            translateY(-50%) 
-            translateX(100%) 
-            rotate(-90deg) 
-            translateY(-100%); /* Move button up by its own height */
+        right: 200px; /* Match input-container width */
+        width: max-content;
+        transform-origin: center;
+        transform: translate(calc(200px - 100%)) rotate(90deg);
         background: #2a2a2a;
         border: 2px solid #ebd43f;
-        border-bottom: none;
+        border-top: none;
         padding: 4px 10px;
         color: #ebd43f;
         font-size: 12px; /* Reduced from 14px */
         cursor: pointer;
         z-index: 101; /* Higher than input-container */
-        border-radius: 4px 4px 0 0; /* Reduced from 8px */
+        border-radius: 0 0 8px 8px; /* Reduced from 8px */
         white-space: nowrap;
         box-shadow: 0 -2px 5px rgba(0,0,0,0.3);
-        transition: right 0.3s ease-out;
-    }
-
-    #toggleFilters::before,
-    #toggleFilters::after {
-        content: "==="; /* Reduced from "=====" */
-        color: #ebd43f;
-        margin: 0 4px; /* Reduced from 8px */
+        transition: right 0.2s ease-out;
     }
 
     #toggleFilters.hidden {
-        right: 0; /* Move to edge of screen when hidden */
+        transform-origin: center;
+        transform: translate(calc(200px - 100%)) rotate(90deg);
+        right: 0;
     }
 
     .mobile-about,
