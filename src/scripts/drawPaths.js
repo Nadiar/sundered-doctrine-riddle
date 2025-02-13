@@ -1,8 +1,10 @@
 const canvas = document.getElementById('mapCanvas');
 const ctx = canvas.getContext('2d');
-const circleRadius = 15;
-// Define colors locally
+const BASE_CIRCLE_RADIUS = 32;  // Base size before scaling
+const BASE_LINE_THICKNESS = 12;  // Fixed line thickness
+const BASE_ARROW_LENGTH = 40;  // Base arrow length
 
+// Define colors locally
 const circleColor = '#945e19';
 const pathColors = ['#FF6B6B', '#4ECDC4', '#ebd43f'];
 const originColor = '#6c91d1';
@@ -22,11 +24,43 @@ window.drawingState = {
 // Core drawing functions
 function resizeCanvas() {
     const aspectRatio = mapImage.width / mapImage.height;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerWidth / aspectRatio;
-    window.drawingState.scale = canvas.width / mapImage.width;
+    
+    // Calculate available space
+    const headerHeight = document.querySelector('.page-header')?.offsetHeight || 0;
+    const controlsHeight = document.getElementById('mapControls')?.offsetHeight || 0;
+    const statusHeight = document.getElementById('mapStatus')?.offsetHeight || 0;
+    const footerHeight = document.querySelector('footer')?.offsetHeight || 0;
+    const verticalPadding = 40;
+    
+    // Calculate maximum available height and width
+    const maxAvailableHeight = window.innerHeight - (headerHeight + controlsHeight + statusHeight + footerHeight + verticalPadding);
+    const maxAvailableWidth = window.innerWidth * 0.95;
+    
+    // Calculate dimensions that maintain aspect ratio within bounds
+    let width = maxAvailableWidth;
+    let height = width / aspectRatio;
+    
+    if (height > maxAvailableHeight) {
+        height = maxAvailableHeight;
+        width = height * aspectRatio;
+    }
+    
+    canvas.width = width;
+    canvas.height = height;
+    window.drawingState.scale = width / mapImage.width;
+    
     drawPaths();
 }
+
+// Add resize observer
+const resizeObserver = new ResizeObserver(() => {
+    requestAnimationFrame(resizeCanvas);
+});
+
+// Observe elements that affect layout
+document.querySelectorAll('.page-header, #mapControls, #mapStatus, footer').forEach(el => {
+    if (el) resizeObserver.observe(el);
+});
 
 const mapImage = new Image();
     mapImage.src = 'src/images/map.png';
@@ -62,26 +96,51 @@ function drawPaths() {
     }
 }
 
+// Add helper function for consistent scaling
+function getScaledSize(baseSize) {
+    return baseSize * (window.drawingState.scale || 1);
+}
+
 function drawPathOnly(pathObj) {
     const { path, color } = pathObj;
     const { scale } = window.drawingState;
     if (!path || path.length === 0) return;
     
+    const scaledRadius = getScaledSize(BASE_CIRCLE_RADIUS);
+    
     ctx.strokeStyle = color;
-    ctx.lineWidth = 6;
+    ctx.lineWidth = getScaledSize(BASE_LINE_THICKNESS);
     ctx.lineCap = 'round';
     ctx.save();
 
     for (let i = 1; i < path.length; i++) {
         ctx.beginPath();
-        const start = adjustPoint(path[i - 1].x * scale, path[i - 1].y * scale, path[i].x * scale, path[i].y * scale, circleRadius);
-        const end = adjustPoint(path[i].x * scale, path[i].y * scale, path[i - 1].x * scale, path[i - 1].y * scale, circleRadius);
+        const start = adjustPoint(
+            path[i - 1].x * scale, 
+            path[i - 1].y * scale, 
+            path[i].x * scale, 
+            path[i].y * scale, 
+            scaledRadius
+        );
+        const end = adjustPoint(
+            path[i].x * scale, 
+            path[i].y * scale, 
+            path[i - 1].x * scale, 
+            path[i - 1].y * scale, 
+            scaledRadius
+        );
         ctx.moveTo(start.x, start.y);
         ctx.lineTo(end.x, end.y);
         ctx.stroke();
     }
+    
     if (path.length > 1) {
-        drawArrow(path[path.length - 2].x * scale, path[path.length - 2].y * scale, path[path.length - 1].x * scale, path[path.length - 1].y * scale);
+        drawArrow(
+            path[path.length - 2].x * scale,
+            path[path.length - 2].y * scale,
+            path[path.length - 1].x * scale,
+            path[path.length - 1].y * scale
+        );
     }
     ctx.restore();
 }
@@ -101,17 +160,16 @@ function drawPathCircles(pathObj) {
 }
 
 function drawCircle(x, y, color) {
+    const scaledRadius = getScaledSize(BASE_CIRCLE_RADIUS);
     ctx.beginPath();
     ctx.strokeStyle = color;
-    ctx.arc(x, y, circleRadius, 0, 2 * Math.PI);
+    ctx.lineWidth = getScaledSize(BASE_LINE_THICKNESS); // Use same thickness as lines
+    ctx.arc(x, y, scaledRadius, 0, 2 * Math.PI);
     ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
-    ctx.save();
 }
 
 function drawArrow(x1, y1, x2, y2) {
-    const headLength = 20;
+    const headLength = getScaledSize(BASE_ARROW_LENGTH);
     const dx = x2 - x1;
     const dy = y2 - y1;
     const angle = Math.atan2(dy, dx);
@@ -139,6 +197,14 @@ function adjustPoint(x1, y1, x2, y2, radius) {
     };
 }
 
+// For hit detection in mouse events, use scaled radius
+function isPointInCircle(x, y, circleX, circleY) {
+    const scaledRadius = getScaledSize(BASE_CIRCLE_RADIUS);
+    const dx = x - circleX;
+    const dy = y - circleY;
+    return Math.sqrt(dx * dx + dy * dy) < scaledRadius;
+}
+
 // Canvas event handlers
 canvas.addEventListener('click', (event) => {
     if (!window.drawingState.isDrawing || window.drawingState.paths.some(p => JSON.stringify(p.path) === JSON.stringify(window.drawingState.currentPath))) return;
@@ -159,9 +225,7 @@ canvas.addEventListener('mousedown', (event) => {
     if (window.isEditMode) {
         // Check for circle hits first
         window.currentPath.forEach((point, index) => {
-            const dx = point.x - x;
-            const dy = point.y - y;
-            if (Math.sqrt(dx * dx + dy * dy) < circleRadius / window.drawingState.scale) {
+            if (isPointInCircle(x, y, point.x, point.y)) {
                 window.drawingState.isDragging = true;
                 window.drawingState.dragIndex = index;
                 window.drawingState.dragTarget = 'circle';
@@ -172,9 +236,7 @@ canvas.addEventListener('mousedown', (event) => {
         // If no circle was hit, check for arrow hit
         if (!window.drawingState.isDragging && window.currentPath.length > 1) {
             const lastPoint = window.currentPath[window.currentPath.length - 1];
-            const dx = lastPoint.x - x;
-            const dy = lastPoint.y - y;
-            if (Math.sqrt(dx * dx + dy * dy) < circleRadius / window.drawingState.scale) {
+            if (isPointInCircle(x, y, lastPoint.x, lastPoint.y)) {
                 window.drawingState.isDragging = true;
                 window.drawingState.dragIndex = window.currentPath.length - 1;
                 window.drawingState.dragTarget = 'arrow';
@@ -220,10 +282,8 @@ canvas.addEventListener('mousemove', (event) => {
         let canDrag = false;
         
         // Check circles and arrow
-        window.currentPath.forEach((point, index) => {
-            const dx = point.x - x;
-            const dy = point.y - y;
-            if (Math.sqrt(dx * dx + dy * dy) < circleRadius / window.drawingState.scale) {
+        window.currentPath.forEach(point => {
+            if (isPointInCircle(x, y, point.x, point.y)) {
                 canDrag = true;
             }
         });
