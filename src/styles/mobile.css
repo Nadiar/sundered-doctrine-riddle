@@ -1,7 +1,11 @@
 #toggleFilters {
     display: none; /* Hidden by default on desktop */
 }
-
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 .mobile-about-popup,
 .mobile-about,
 .about-toggle,
@@ -11,25 +15,29 @@
 
 @media screen and (max-width: 768px) {
     body, main {
+        display: block;
         margin: 0;
         padding: 0;
-        height: 100vh;
-        width: 100vw;
+        width: 100%;
+        height: 100%;
         overflow: hidden;
-        background: #000;
+        background: #14161b;
         position: relative;
+        object-fit: contain;
     }
 
     #mapCanvas {
+        display: block;
+        margin: 0;
         position: fixed;
-        top: 50%;
-        left: 50%;
-        /* Using exact 4096x2188 aspect ratio (≈1.873) */
-        width: min(100vh * 1.873, 200vw);
-        height: min(100vw * 0.534, 200vh);
-        transform: translate(-50%, -50%) rotate(90deg);
+        max-width: 100vh;
+        max-height: 100vw;
+        width: auto;
+        height: 100%;
+        object-fit: contain;
+        transform: translatex(calc(50vw - 50%)) translatey(calc(50vh - 50%)) rotate(90deg);
         transform-origin: center;
-        z-index: 1;
+        z-index: 1; /* Base layer */
     }
 
     canvas {
@@ -46,8 +54,7 @@
         width: 200px; /* Fixed width instead of fit-content */
         min-width: 180px;
         max-width: 250px;
-        height: auto;
-        min-height: fit-content;
+        height: 100vh; /* Fill entire height */
         background: rgba(20, 20, 20, 0.98); /* More opaque background */
         padding: 15px;
         z-index: 3; /* Top layer */
