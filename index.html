@@ -7,9 +7,30 @@
     <link rel="stylesheet" href="src/styles/style.css">
     <link rel="stylesheet" href="src/styles/index.css">
     <style>
+        .selection-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
         .selection-box.disabled {
             opacity: 0.5;
             pointer-events: none;
+        }
+
+        .option {
+            position: relative;
+        }
+
+        .option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            background-color: #333;
+        }
+
+        .option.selected {
+            background-color: #ebd43f;
+            color: #000;
         }
     </style>
 </head>
@@ -27,7 +48,7 @@
                 </div>
                 <input type="hidden" id="input1" value="">
             </div>
-            <div class="selection-box">
+            <div class="selection-box disabled">
                 <label for="input2">Second Symbol:</label>
                 <div class="options">
                     <button class="option" data-value="l2">L2</button>
@@ -38,7 +59,7 @@
                 </div>
                 <input type="hidden" id="input2" value="">
             </div>
-            <div class="selection-box">
+            <div class="selection-box disabled">
                 <label for="input3">Final Symbol:</label>
                 <div class="options">
                     <button class="option" data-value="l2">L2</button>

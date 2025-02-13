@@ -29,71 +29,76 @@ class UIManager {
     }
 
     handleOptionClick(event) {
-        console.log('Option clicked:', event.target.dataset.value);
         const button = event.target;
+        if (button.classList.contains('disabled')) return;
+        
         const value = button.getAttribute('data-value');
         const selectionBox = button.closest('.selection-box');
         const input = selectionBox.querySelector('input[type="hidden"]');
-        
-        console.log('Before update:', {
-            value,
-            currentInputs: {
-                input1: this.inputs[0].value,
-                input2: this.inputs[1].value,
-                input3: this.inputs[2].value
-            }
-        });
+        const currentValue = input.value;
+        const selectionBoxIndex = this.inputs.indexOf(input);
 
-        // Handle button selection
-        selectionBox.querySelectorAll('.option').forEach(btn => {
-            btn.classList.remove('selected');
-        });
-        button.classList.add('selected');
-        input.value = value;
-
-        // Handle dependencies
-        if (input === this.inputs[0]) {
-            if (value) {
-                this.selectionBoxes[0].classList.remove('disabled');
-            } else {
-                this.selectionBoxes[0].classList.add('disabled');
-                this.selectionBoxes[1].classList.add('disabled');
-                this.inputs[1].value = '';
-                this.inputs[2].value = '';
-                this.resetSelectionBox(this.selectionBoxes[0]);
-                this.resetSelectionBox(this.selectionBoxes[1]);
-            }
-        } else if (input === this.inputs[1]) {
-            if (value && this.inputs[0].value) {
-                this.selectionBoxes[1].classList.remove('disabled');
-            } else {
-                this.selectionBoxes[1].classList.add('disabled');
-                this.inputs[2].value = '';
-                this.resetSelectionBox(this.selectionBoxes[1]);
-            }
-        }
-
-        console.log('After update:', {
-            value,
-            currentInputs: {
-                input1: this.inputs[0].value,
-                input2: this.inputs[1].value,
-                input3: this.inputs[2].value
-            }
-        });
-
-        // Update display if we have data
-        if (window.yamlData) {
-            console.log('Updating display with YAML data:', window.yamlData);
-            this.updateDisplay();
+        // If clicking the same button, deselect it
+        if (currentValue === value) {
+            input.value = '';
+            selectionBox.querySelectorAll('.option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            selectionBox.querySelector('.option[data-value=""]').classList.add('selected');
+            
+            this.resetSubsequentBoxes(selectionBoxIndex);
         } else {
-            console.log('No YAML data available');
+            // Select new value
+            input.value = value;
+            selectionBox.querySelectorAll('.option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            button.classList.add('selected');
+
+            // Reset and reconfigure subsequent boxes
+            if (selectionBoxIndex < this.inputs.length - 1) {
+                this.resetSubsequentBoxes(selectionBoxIndex);
+                
+                // Enable next box
+                const nextBox = this.inputs[selectionBoxIndex + 1].closest('.selection-box');
+                nextBox.classList.remove('disabled');
+                
+                // Get all previously selected values
+                const selectedValues = this.inputs
+                    .slice(0, selectionBoxIndex + 1)
+                    .map(input => input.value)
+                    .filter(Boolean);
+                
+                // Disable all previously selected values in subsequent boxes
+                for (let i = selectionBoxIndex + 1; i < this.inputs.length; i++) {
+                    const laterBox = this.inputs[i].closest('.selection-box');
+                    selectedValues.forEach(selectedValue => {
+                        laterBox.querySelectorAll(`.option[data-value="${selectedValue}"]`).forEach(btn => {
+                            btn.classList.add('disabled');
+                        });
+                    });
+                }
+            }
         }
+
+        this.updateDisplay();
     }
 
     resetSelectionBox(box) {
         box.querySelectorAll('.option').forEach(btn => btn.classList.remove('selected'));
         box.querySelector('.option[data-value=""]').classList.add('selected');
+    }
+
+    resetSubsequentBoxes(startIndex) {
+        for (let i = startIndex + 1; i < this.inputs.length; i++) {
+            const box = this.inputs[i].closest('.selection-box');
+            box.classList.add('disabled');
+            this.inputs[i].value = '';
+            box.querySelectorAll('.option').forEach(btn => {
+                btn.classList.remove('selected', 'disabled');
+            });
+            box.querySelector('.option[data-value=""]').classList.add('selected');
+        }
     }
 
     updateDisplay() {
