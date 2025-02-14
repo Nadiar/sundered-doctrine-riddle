@@ -96,6 +96,13 @@ input {
     background-color: #14171a; /* Same as page background */
     flex: 0 0 auto;
     min-width: fit-content;
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.selection-box.disabled {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
 .selection-box .options {
@@ -136,6 +143,22 @@ input {
 .selection-box .options button[data-value=""] {
     grid-column: span 2;
     justify-self: center;
+}
+
+.option {
+    position: relative;
+}
+
+.option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    background-color: #333;
+}
+
+.option.selected {
+    background-color: #ebd43f;
+    color: #000;
 }
 
 #legend {
