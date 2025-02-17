@@ -39,7 +39,7 @@ html, body {
         transform-origin: center;
         z-index: 1; /* Base layer */
         image-rendering: auto;
-        background: url('src/images/map-half.png') no-repeat center center;
+        background: url('src/images/map-small.png') no-repeat center center;
         background-size: contain;
     }
 
